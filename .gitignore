@@ -4,3 +4,4 @@ cache
 coverage
 typechain-types
 .env
+addresses.json
