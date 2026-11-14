@@ -9,6 +9,7 @@ module.exports = {
       url: process.env.BESU_RPC_URL || "http://127.0.0.1:8545",
       accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
       gasPrice: 0,
+      gas: 5000000,
     },
   },
 };
