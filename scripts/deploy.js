@@ -10,21 +10,21 @@ async function main() {
 
   // 1. Deploy do WydenCoin
   console.log("-> Fazendo deploy do WydenCoin...");
-  const wc = await ethers.deployContract("WydenCoin");
+  const wc = await ethers.deployContract("WydenCoin", { gasLimit: 5000000 });
   await wc.waitForDeployment();
   const wcAddress = await wc.getAddress();
   console.log(`[+] WydenCoin (WC) publicado em: ${wcAddress}`);
 
   // 2. Deploy do RedemptionManager
   console.log("-> Fazendo deploy do RedemptionManager...");
-  const rm = await ethers.deployContract("RedemptionManager", [wcAddress]);
+  const rm = await ethers.deployContract("RedemptionManager", [wcAddress], { gasLimit: 5000000 });
   await rm.waitForDeployment();
   const rmAddress = await rm.getAddress();
   console.log(`[+] RedemptionManager publicado em: ${rmAddress}`);
 
   // 3. Vincular RedemptionManager no WydenCoin
   console.log("-> Autorizando RedemptionManager no WydenCoin...");
-  const txLink = await wc.setRedemptionManager(rmAddress);
+  const txLink = await wc.setRedemptionManager(rmAddress, { gasLimit: 500000 });
   await txLink.wait();
   console.log("[OK] RedemptionManager autorizado com sucesso.");
 
@@ -32,7 +32,7 @@ async function main() {
   const minterTarget = process.env.MINTER_ADDRESS || deployer.address;
   const minterRole = await wc.MINTER_ROLE();
   if (!(await wc.hasRole(minterRole, minterTarget))) {
-    const txMinter = await wc.grantRole(minterRole, minterTarget);
+    const txMinter = await wc.grantRole(minterRole, minterTarget, { gasLimit: 500000 });
     await txMinter.wait();
     console.log(`[OK] MINTER_ROLE concedida a ${minterTarget}`);
   }
@@ -44,18 +44,35 @@ async function main() {
   const managerRole = await rm.MANAGER_ROLE();
 
   if (!(await rm.hasRole(confirmerRole, confirmerTarget))) {
-    const txConfirmer = await rm.grantRole(confirmerRole, confirmerTarget);
+    const txConfirmer = await rm.grantRole(confirmerRole, confirmerTarget, { gasLimit: 500000 });
     await txConfirmer.wait();
     console.log(`[OK] CONFIRMER_ROLE concedida a ${confirmerTarget}`);
   }
 
   if (!(await rm.hasRole(managerRole, managerTarget))) {
-    const txManager = await rm.grantRole(managerRole, managerTarget);
+    const txManager = await rm.grantRole(managerRole, managerTarget, { gasLimit: 500000 });
     await txManager.wait();
     console.log(`[OK] MANAGER_ROLE concedida a ${managerTarget}`);
   }
 
-  // 6. Exportar endereços para addresses.json
+  // 6. Configurar aprovação de transferência e autorizar contas de benchmark
+  const txApprove = await wc.approve(rmAddress, ethers.MaxUint256, { gasLimit: 500000 });
+  await txApprove.wait();
+  console.log("[OK] Limite de transferência aprovado para o deployer.");
+
+  console.log("-> Concedendo MINTER_ROLE para contas de teste/benchmark...");
+  const seed = "0x3f841bf589fdf83a521e55d51afddc34fa65351161eead24f064855fc29c9580";
+  const hdNode = ethers.HDNodeWallet.fromSeed(seed);
+  for (let i = 0; i < 10; i++) {
+    const workerAddr = hdNode.derivePath(`m/44'/60'/0'/0/${i}`).address;
+    if (!(await wc.hasRole(minterRole, workerAddr))) {
+      const tx = await wc.grantRole(minterRole, workerAddr, { gasLimit: 500000 });
+      await tx.wait();
+    }
+  }
+  console.log("[OK] Contas de benchmark autorizadas com MINTER_ROLE.");
+
+  // 7. Exportar endereços para addresses.json
   const deployedAddresses = {
     WydenCoin: wcAddress,
     RedemptionManager: rmAddress,
