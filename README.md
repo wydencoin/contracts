@@ -108,10 +108,7 @@ O parâmetro `motivo` é codificado em `bytes32` legível: `ethers.encodeBytes32
 
 ## 🛠️ Integração com Backend / APIs
 
-Consulte [`scripts/backend_api.example.js`](scripts/backend_api.example.js) para exemplos práticos em JavaScript/ethers.js de:
-- Consulta de saldo (`balanceOf`);
-- Emissão avulsa e em lote (`mintRewardBatch`);
-- Aprovação e solicitação de resgate (`approve` + `resgatar`);
-- Confirmação de uso e queima (`confirmarUso`);
-- Cancelamento e estorno (`cancelar`);
-- Processamento de expiração (`expirar`).
+Para consumir a blockchain a partir do backend geral ou APIs do ecossistema, utilize o cliente REST oficial do Gateway (não requer ethers nem ABIs):
+👉 **[`scripts/gateway_client.example.js`](scripts/gateway_client.example.js)**
+
+Para exemplos de integração direta de baixo nível via ethers.js (Web3), consulte [`scripts/backend_api.example.js`](scripts/backend_api.example.js).
