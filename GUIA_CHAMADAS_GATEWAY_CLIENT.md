@@ -14,9 +14,9 @@ Qualquer linguagem ou ferramenta (cURL, Postman, Insomnia, Python `requests`, Fl
 * **Headers HTTP Obrigatórios:**
   ```http
   Content-Type: application/json
-  X-API-KEY: wyden-rpc-sec-9a8f27b4e1
+  X-API-KEY: sua-api-key-secreta
   ```
-  *(Também é aceito no formato `Authorization: Bearer wyden-rpc-sec-9a8f27b4e1`)*
+  *(Também é aceito no formato `Authorization: Bearer sua-api-key-secreta`)*
 
 ---
 
@@ -81,7 +81,7 @@ Retorna o saldo de WydenCoins de uma carteira informada na URL.
 * **Método:** `GET`
 * **URL:** `http://wydencoin-rpc.duckdns.org:8546/api/v1/saldo/0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73`
 * **Headers:**
-  * `X-API-KEY: wyden-rpc-sec-9a8f27b4e1`
+  * `X-API-KEY: sua-api-key-secreta`
 * **Body:** Nenhum.
 
 #### Exemplo de Resposta JSON (`200 OK`):
@@ -97,7 +97,7 @@ Retorna o saldo de WydenCoins de uma carteira informada na URL.
 #### Exemplo cURL:
 ```bash
 curl -X GET http://wydencoin-rpc.duckdns.org:8546/api/v1/saldo/0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73 \
-  -H "X-API-KEY: wyden-rpc-sec-9a8f27b4e1"
+  -H "X-API-KEY: sua-api-key-secreta"
 ```
 
 ---
@@ -110,7 +110,7 @@ Emite novas unidades de WydenCoin para a carteira de um aluno por motivo meritó
 * **URL:** `http://wydencoin-rpc.duckdns.org:8546/api/v1/recompensas/mint`
 * **Headers:**
   * `Content-Type: application/json`
-  * `X-API-KEY: wyden-rpc-sec-9a8f27b4e1`
+  * `X-API-KEY: sua-api-key-secreta`
 
 #### JSON da Requisição (Request Payload):
 ```json
@@ -142,7 +142,7 @@ Emite novas unidades de WydenCoin para a carteira de um aluno por motivo meritó
 ```bash
 curl -X POST http://wydencoin-rpc.duckdns.org:8546/api/v1/recompensas/mint \
   -H "Content-Type: application/json" \
-  -H "X-API-KEY: wyden-rpc-sec-9a8f27b4e1" \
+  -H "X-API-KEY: sua-api-key-secreta" \
   -d '{
     "aluno": "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73",
     "valor": 10,
@@ -160,7 +160,7 @@ Emite moedas para múltiplos alunos em uma **única transação atômica**. Idea
 * **URL:** `http://wydencoin-rpc.duckdns.org:8546/api/v1/recompensas/mint-batch`
 * **Headers:**
   * `Content-Type: application/json`
-  * `X-API-KEY: wyden-rpc-sec-9a8f27b4e1`
+  * `X-API-KEY: sua-api-key-secreta`
 
 #### JSON da Requisição (Request Payload):
 ```json
@@ -199,7 +199,7 @@ Emite moedas para múltiplos alunos em uma **única transação atômica**. Idea
 ```bash
 curl -X POST http://wydencoin-rpc.duckdns.org:8546/api/v1/recompensas/mint-batch \
   -H "Content-Type: application/json" \
-  -H "X-API-KEY: wyden-rpc-sec-9a8f27b4e1" \
+  -H "X-API-KEY: sua-api-key-secreta" \
   -d '{
     "itens": [
       { "aluno": "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73", "valor": 10, "motivo": "SIA_15D" },
@@ -218,12 +218,12 @@ Transfere as moedas do aluno para a custódia do contrato `RedemptionManager` ge
 * **URL:** `http://wydencoin-rpc.duckdns.org:8546/api/v1/resgates`
 * **Headers:**
   * `Content-Type: application/json`
-  * `X-API-KEY: wyden-rpc-sec-9a8f27b4e1`
+  * `X-API-KEY: sua-api-key-secreta`
 
 #### JSON da Requisição (Request Payload):
 ```json
 {
-  "alunoPrivateKey": "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63",
+  "alunoPrivateKey": "0x_chave_privada_exemplo_0000000000000000000000000000000000000000",
   "beneficioId": 101,
   "valor": 15,
   "horasValidade": 24
@@ -253,9 +253,9 @@ Transfere as moedas do aluno para a custódia do contrato `RedemptionManager` ge
 ```bash
 curl -X POST http://wydencoin-rpc.duckdns.org:8546/api/v1/resgates \
   -H "Content-Type: application/json" \
-  -H "X-API-KEY: wyden-rpc-sec-9a8f27b4e1" \
+  -H "X-API-KEY: sua-api-key-secreta" \
   -d '{
-    "alunoPrivateKey": "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63",
+    "alunoPrivateKey": "0x_chave_privada_exemplo_0000000000000000000000000000000000000000",
     "beneficioId": 101,
     "valor": 15,
     "horasValidade": 24
@@ -271,7 +271,7 @@ Obtém os dados e o status on-chain de um voucher emitido.
 * **Método:** `GET`
 * **URL:** `http://wydencoin-rpc.duckdns.org:8546/api/v1/resgates/1`
 * **Headers:**
-  * `X-API-KEY: wyden-rpc-sec-9a8f27b4e1`
+  * `X-API-KEY: sua-api-key-secreta`
 * **Body:** Nenhum.
 
 #### Exemplo de Resposta JSON (`200 OK`):
@@ -297,7 +297,7 @@ Obtém os dados e o status on-chain de um voucher emitido.
 #### Exemplo cURL:
 ```bash
 curl -X GET http://wydencoin-rpc.duckdns.org:8546/api/v1/resgates/1 \
-  -H "X-API-KEY: wyden-rpc-sec-9a8f27b4e1"
+  -H "X-API-KEY: sua-api-key-secreta"
 ```
 
 ---
@@ -309,7 +309,7 @@ Chamado quando o operador da cantina valida o QR Code do voucher. Queima definit
 * **Método:** `POST`
 * **URL:** `http://wydencoin-rpc.duckdns.org:8546/api/v1/resgates/1/confirmar`
 * **Headers:**
-  * `X-API-KEY: wyden-rpc-sec-9a8f27b4e1`
+  * `X-API-KEY: sua-api-key-secreta`
 * **Body:** Vazio ou `{}`.
 
 #### Exemplo de Resposta JSON (`200 OK`):
@@ -326,7 +326,7 @@ Chamado quando o operador da cantina valida o QR Code do voucher. Queima definit
 #### Exemplo cURL:
 ```bash
 curl -X POST http://wydencoin-rpc.duckdns.org:8546/api/v1/resgates/1/confirmar \
-  -H "X-API-KEY: wyden-rpc-sec-9a8f27b4e1"
+  -H "X-API-KEY: sua-api-key-secreta"
 ```
 
 ---
@@ -338,7 +338,7 @@ Cancela um voucher pendente e devolve integralmente as moedas para a carteira do
 * **Método:** `POST`
 * **URL:** `http://wydencoin-rpc.duckdns.org:8546/api/v1/resgates/1/cancelar`
 * **Headers:**
-  * `X-API-KEY: wyden-rpc-sec-9a8f27b4e1`
+  * `X-API-KEY: sua-api-key-secreta`
 * **Body:** Vazio ou `{}`.
 
 #### Exemplo de Resposta JSON (`200 OK`):
@@ -355,7 +355,7 @@ Cancela um voucher pendente e devolve integralmente as moedas para a carteira do
 #### Exemplo cURL:
 ```bash
 curl -X POST http://wydencoin-rpc.duckdns.org:8546/api/v1/resgates/1/cancelar \
-  -H "X-API-KEY: wyden-rpc-sec-9a8f27b4e1"
+  -H "X-API-KEY: sua-api-key-secreta"
 ```
 
 ---
@@ -367,7 +367,7 @@ Executa a devolução das moedas ao aluno quando a validade (`expiraEm`) foi ult
 * **Método:** `POST`
 * **URL:** `http://wydencoin-rpc.duckdns.org:8546/api/v1/resgates/1/expirar`
 * **Headers:**
-  * `X-API-KEY: wyden-rpc-sec-9a8f27b4e1`
+  * `X-API-KEY: sua-api-key-secreta`
 * **Body:** Vazio ou `{}`.
 
 #### Exemplo de Resposta JSON (`200 OK`):
@@ -384,7 +384,7 @@ Executa a devolução das moedas ao aluno quando a validade (`expiraEm`) foi ult
 #### Exemplo cURL:
 ```bash
 curl -X POST http://wydencoin-rpc.duckdns.org:8546/api/v1/resgates/1/expirar \
-  -H "X-API-KEY: wyden-rpc-sec-9a8f27b4e1"
+  -H "X-API-KEY: sua-api-key-secreta"
 ```
 
 ---
@@ -397,7 +397,7 @@ Permite executar qualquer chamada padrão JSON-RPC contra o nó Hyperledger Besu
 * **URL:** `http://wydencoin-rpc.duckdns.org:8546/api/v1/rpc`
 * **Headers:**
   * `Content-Type: application/json`
-  * `X-API-KEY: wyden-rpc-sec-9a8f27b4e1`
+  * `X-API-KEY: sua-api-key-secreta`
 
 #### JSON da Requisição (Request Payload):
 ```json
@@ -420,7 +420,7 @@ Permite executar qualquer chamada padrão JSON-RPC contra o nó Hyperledger Besu
 ```bash
 curl -X POST http://wydencoin-rpc.duckdns.org:8546/api/v1/rpc \
   -H "Content-Type: application/json" \
-  -H "X-API-KEY: wyden-rpc-sec-9a8f27b4e1" \
+  -H "X-API-KEY: sua-api-key-secreta" \
   -d '{
     "method": "eth_blockNumber",
     "params": []
@@ -473,7 +473,7 @@ const resposta = await fetch("http://wydencoin-rpc.duckdns.org:8546/api/v1/recom
   method: "POST",
   headers: {
     "Content-Type": "application/json",
-    "X-API-KEY": "wyden-rpc-sec-9a8f27b4e1"
+    "X-API-KEY": "sua-api-key-secreta"
   },
   body: JSON.stringify({
     aluno: "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73",
@@ -493,7 +493,7 @@ import requests
 url = "http://wydencoin-rpc.duckdns.org:8546/api/v1/recompensas/mint"
 headers = {
     "Content-Type": "application/json",
-    "X-API-KEY": "wyden-rpc-sec-9a8f27b4e1"
+    "X-API-KEY": "sua-api-key-secreta"
 }
 payload = {
     "aluno": "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73",
@@ -516,7 +516,7 @@ Future<void> emitirMoeda() async {
     url,
     headers: {
       'Content-Type': 'application/json',
-      'X-API-KEY': 'wyden-rpc-sec-9a8f27b4e1',
+      'X-API-KEY': 'sua-api-key-secreta',
     },
     body: jsonEncode({
       'aluno': '0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73',
