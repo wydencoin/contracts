@@ -28,13 +28,21 @@ async function main() {
   await txLink.wait();
   console.log("[OK] RedemptionManager autorizado com sucesso.");
 
-  // 4. Configurar MINTER_ROLE
+  // 4. Configurar MINTER_ROLE e DIRECTOR_ROLE
   const minterTarget = process.env.MINTER_ADDRESS || deployer.address;
   const minterRole = await wc.MINTER_ROLE();
   if (!(await wc.hasRole(minterRole, minterTarget))) {
     const txMinter = await wc.grantRole(minterRole, minterTarget, { gasLimit: 500000 });
     await txMinter.wait();
     console.log(`[OK] MINTER_ROLE concedida a ${minterTarget}`);
+  }
+
+  const directorTarget = process.env.DIRECTOR_ADDRESS || deployer.address;
+  const directorRole = await wc.DIRECTOR_ROLE();
+  if (!(await wc.hasRole(directorRole, directorTarget))) {
+    const txDirector = await wc.grantRole(directorRole, directorTarget, { gasLimit: 500000 });
+    await txDirector.wait();
+    console.log(`[OK] DIRECTOR_ROLE concedida a ${directorTarget}`);
   }
 
   // 5. Configurar CONFIRMER_ROLE e MANAGER_ROLE
