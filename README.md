@@ -21,8 +21,8 @@ Documentação complementar em `docs/`:
 
 | Contrato | Endereço |
 | :--- | :--- |
-| `WydenCoin` (`WC`) | `0xa50a51c09a5c451C52BB714527E1974b686D8e77` |
-| `RedemptionManager` | `0x9a3DBCa554e9f6b9257aAa24010DA8377C57c17e` |
+| `WydenCoin` (`WC`) | `0xdB6371a89E3C840a14DE470Dd0247cC7459Fa2A2` |
+| `RedemptionManager` | `0x6023FF0A8203ea32E737819B301D1672Dd2ECBE0` |
 
 ---
 
