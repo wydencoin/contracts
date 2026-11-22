@@ -1,114 +1,130 @@
-# contracts — WydenCoin
+# Contratos Inteligentes — WydenCoin
 
-Contratos Solidity da arquitetura WydenCoin. Responsável: **Carlos Mikael**.
+Contratos Solidity, suíte de testes Hardhat e scripts de implantação da arquitetura **WydenCoin**.
 
-| Contrato | Descrição | Estado |
-| --- | --- | --- |
-| [`WydenCoin.sol`](contracts/WydenCoin.sol) | ERC-20 (símbolo `WC`), 0 decimais, emissão com motivo (`bytes32`), emissão em lote atômica, transferência P2P entre alunos bloqueada | **v0 testado** (11 testes) |
-| [`RedemptionManager.sol`](contracts/RedemptionManager.sol) | Gerenciador do ciclo de vida dos resgates: bloquear tokens em custódia, confirmar uso (queimar/burn), cancelar ou expirar (restituir saldo) | **v0 testado** (14 testes) |
+| Contrato | Descrição | Testes |
+| :--- | :--- | :--- |
+| [`WydenCoin.sol`](contracts/WydenCoin.sol) | Token ERC-20 (`WC`), 0 casas decimais, emissão com motivo (`bytes32`), emissão atômica em lote e bloqueio de transferências P2P entre alunos | `test/WydenCoin.test.js` |
+| [`RedemptionManager.sol`](contracts/RedemptionManager.sol) | Gestão do ciclo de vida de vouchers: custódia no resgate, queima (`burn`) na confirmação de uso, e restituição em cancelamento ou expiração | `test/RedemptionManager.test.js` |
+
+Documentação complementar em `docs/`:
+* [Especificação do RedemptionManager](docs/redemption-manager.md)
+* [Revisão técnica v0 do WydenCoin](docs/revisao-v0.md)
 
 ---
 
-## 📍 Endereços na Rede Multi-Node (Oracle Cloud - Besu QBFT)
+## Endereços Implantados (Rede Besu QBFT)
 
-* **RPC Endpoint:** `http://wydencoin-rpc.duckdns.org:8545`
+* **RPC Endpoint:** `http://wydencoin-rpc.duckdns.org:8545` (acesso direto em rede autorizada) / `http://wydencoin-rpc.duckdns.org:8546` (via RPC Gateway autenticado)
 * **Chain ID:** `381660001` (`0x16bfab61`)
-* **Consenso:** QBFT (Blocos a cada 2 segundos, custo de gas zerado)
+* **Consenso:** QBFT (blocos a cada 2 segundos, `min-gas-price=0`)
 
-| Contrato | Endereço Implantado |
+| Contrato | Endereço |
 | :--- | :--- |
-| **WydenCoin (`WC`)** | `0xa50a51c09a5c451C52BB714527E1974b686D8e77` |
-| **RedemptionManager** | `0x9a3DBCa554e9f6b9257aAa24010DA8377C57c17e` |
+| `WydenCoin` (`WC`) | `0xa50a51c09a5c451C52BB714527E1974b686D8e77` |
+| `RedemptionManager` | `0x9a3DBCa554e9f6b9257aAa24010DA8377C57c17e` |
 
 ---
 
-## 🚀 Como Rodar
+## Execução Local e Testes
 
 ### Instalação de Dependências
+
 ```bash
 npm ci
 ```
 
-### Execução dos Testes Automatizados
+### Suíte de Testes Automatizados
+
 ```bash
 npm test
-# ou: npx hardhat test
+# ou
+npx hardhat test
 ```
-A suíte executa 26 testes cobrindo permissões, limites, reversões e uma simulação real de 213 emissões em lote para 66 alunos.
 
-### Rede Local de Desenvolvimento (Hardhat Node)
+A suíte executa 26 testes cobrindo controle de acesso, validações de saldo e aprovação, reversões, expiração temporal e simulação de emissão quinzenal em lote (213 emissões para 66 alunos).
+
+### Nó Local Hardhat
+
 ```bash
 npx hardhat node
 ```
 
 ### Deploy dos Contratos
-Para deploy local em memória ou no Hardhat Node:
+
+**Em ambiente local (Hardhat):**
 ```bash
 npm run deploy:local
 ```
 
-Para deploy na rede **Hyperledger Besu**:
-1. Copie o arquivo de exemplo de ambiente:
+**Na rede Hyperledger Besu:**
+1. Crie o arquivo `.env` a partir do modelo:
    ```bash
    cp .env.example .env
    ```
-2. Preencha `DEPLOYER_PRIVATE_KEY` e demais contas opcionais (`MINTER_ADDRESS`, etc.).
-3. Execute:
+2. Configure `DEPLOYER_PRIVATE_KEY` e demais endereços opcionais de roles.
+3. Execute o deploy:
    ```bash
    npm run deploy:besu
    ```
-Os endereços implantados são automaticamente registrados em `addresses.json`.
+
+Os endereços implantados são gravados automaticamente em `addresses.json`.
 
 ---
 
-## 🔐 Papéis e Governança (AccessControl)
+## Papéis e Controle de Acesso (`AccessControl`)
 
-| Papel | Contrato | Finalidade | Responsável / Destinatário |
-| --- | --- | --- | --- |
-| `DEFAULT_ADMIN_ROLE` | WydenCoin & RedemptionManager | Administração de roles e configuração do endereço do contrato de resgate (`setRedemptionManager`) | Deployer / Governança |
-| `MINTER_ROLE` | WydenCoin | Autorização exclusiva para emissão individual (`mintReward`) e em lote (`mintRewardBatch`) | Backend / Motor de Recompensas |
-| `CONFIRMER_ROLE` | RedemptionManager | Validação presencial/operacional do voucher e execução da queima dos tokens (`confirmarUso`) | API dos Estabelecimentos / Operadores |
-| `MANAGER_ROLE` | RedemptionManager | Autorização para estorno manual (`cancelar`) ou processamento de vouchers vencidos (`expirar`) | Backend de Gestão / Rotina Cron |
-
----
-
-## 🏷️ Motivos de Emissão (`bytes32`)
-
-O parâmetro `motivo` é codificado em `bytes32` legível: `ethers.encodeBytes32String("SIA_15D")`.
-
-| Código (`motivo`) | Descrição no Extrato | Condição / Critério | Valor Típico |
-|---|---|---|---|
-| `SIA_15D` | Acesso regular ao SIA (15 dias) | Acesso nos últimos 15 dias | 20 WC |
-| `PRES_15D` | Frequência presencial regular | Alunos presenciais com $\ge 75\%$ de presença | 30 a 50 WC |
-| `SIMULADO` | Participação no Simulado | Adesão ao simulado institucional | 15 a 30 WC |
-| `DIG_ESTUDO` | Engajamento no Ambiente Digital | Alunos do curso Digital com acesso no ciclo | 50 WC |
-| `VOLTOU` | Retomada aos Estudos (Anti-Evasão) | Alunos inativos $>30$ dias que retornaram | 100 WC |
-| `CR_SEM` | Desempenho Acadêmico (CR) | Alunos com CR semestral $\ge 6.0$ | 25 a 40 WC |
-| `ESTUDO_30` | *(Reservada)* 30% tempo de estudo | Validação de horas pela coordenação | 100 WC |
-| `ESTUDO_SUBIU` | *(Reservada)* Tempo de estudo subiu | Evolução do tempo de estudo no período | Bônus |
+| Papel | Contrato | Finalidade | Destinatário |
+| :--- | :--- | :--- | :--- |
+| `DEFAULT_ADMIN_ROLE` | `WydenCoin` e `RedemptionManager` | Administração de roles e vínculo do `RedemptionManager` (`setRedemptionManager`) | Conta de Governança / Deployer |
+| `MINTER_ROLE` | `WydenCoin` | Emissão individual (`mintReward`) e em lote (`mintRewardBatch`) | Backend / Motor de Recompensas |
+| `CONFIRMER_ROLE` | `RedemptionManager` | Validação operacional do voucher e queima definitiva das moedas (`confirmarUso`) | API dos Estabelecimentos |
+| `MANAGER_ROLE` | `RedemptionManager` | Cancelamento administrativo (`cancelar`) e estorno por vencimento (`expirar`) | API de Gestão / Rotina Cron |
 
 ---
 
-## 🔄 Fluxo de Resgate (`RedemptionManager`)
+## Códigos de Motivo de Emissão (`bytes32`)
 
+O parâmetro `motivo` é codificado em `bytes32` legível via `ethers.encodeBytes32String("<CODIGO>")`:
+
+| Código (`motivo`) | Descrição | Critério | Referência |
+| :--- | :--- | :--- | :--- |
+| `SIA_15D` | Acesso regular ao SIA (15 dias) | Acesso no ciclo de 15 dias | 20 WC |
+| `PRES_15D` | Frequência presencial regular | Presença $\ge 75\%$ no ciclo | 30 a 50 WC |
+| `SIMULADO` | Participação no simulado | Adesão ao simulado institucional | 15 a 30 WC |
+| `DIG_ESTUDO` | Engajamento no ambiente digital | Acesso no ciclo em cursos digitais | 50 WC |
+| `VOLTOU` | Retomada de estudos | Retorno após inatividade $> 30$ dias | 100 WC |
+| `CR_SEM` | Desempenho acadêmico (CR) | CR semestral $\ge 6.0$ | 25 a 40 WC |
+| `ESTUDO_30` | *(Reservado)* 30% tempo de estudo | Validação de horas pela coordenação | 100 WC |
+| `ESTUDO_SUBIU` | *(Reservado)* Evolução do tempo de estudo | Crescimento no período avaliado | Bônus |
+
+---
+
+## Fluxo do Ciclo de Resgate (`RedemptionManager`)
+
+```text
+[ Aluno ]
+    | (approve + resgatar)
+    v
+[ Resgatado (0) ]  <-- Tokens bloqueados sob custódia do contrato
+    |
+    +---> [ CONFIRMER_ROLE: confirmarUso ] ---> [ Utilizado (1) ] -> Tokens queimados (burn)
+    |
+    +---> [ MANAGER_ROLE: cancelar ]       ---> [ Cancelado (2) ] -> Tokens devolvidos ao aluno
+    |
+    +---> [ MANAGER_ROLE: expirar ]        ---> [ Expirado (3) ]  -> Tokens devolvidos ao aluno (após prazo)
 ```
-   [ Aluno ]
-       | (approve + resgatar)
-       v
- [ Resgatado (0) ]  <-- Tokens bloqueados sob custódia do contrato
-       |
-       +---> [ CONFIRMER_ROLE: confirmarUso ] ---> [ Utilizado (1) ] -> Tokens queimados (burn)
-       |
-       +---> [ MANAGER_ROLE: cancelar ]      ---> [ Cancelado (2) ] -> Tokens devolvidos ao aluno
-       |
-       +---> [ MANAGER_ROLE: expirar ]       ---> [ Expirado (3) ]  -> Tokens devolvidos ao aluno (após prazo)
-```
 
 ---
 
-## 🛠️ Integração com Backend / APIs
+## Integração com Aplicações e Backend
 
-Para consumir a blockchain a partir do backend geral ou APIs do ecossistema, utilize o cliente REST oficial do Gateway (não requer ethers nem ABIs):
-👉 **[`scripts/gateway_client.example.js`](scripts/gateway_client.example.js)**
+A documentação canônica de integração via API REST e SDK cliente reside no repositório `wydencoin/infra`:
 
-Para exemplos de integração direta de baixo nível via ethers.js (Web3), consulte [`scripts/backend_api.example.js`](scripts/backend_api.example.js).
+* **Arquitetura e operação do Gateway:** `infra/gateway/GATEWAY_API.md`
+* **Especificação de chamadas HTTP/JSON (cURL, Python, Dart, fetch):** `infra/gateway/GUIA_CHAMADAS_JSON.md`
+* **Guia do cliente SDK JavaScript:** `infra/gateway/GUIA_CHAMADAS_GATEWAY_CLIENT.md`
+
+Exemplos executáveis disponíveis neste repositório:
+* Cliente REST via Gateway: [`scripts/gateway_client.example.js`](scripts/gateway_client.example.js)
+* Integração direta via `ethers.js`: [`scripts/backend_api.example.js`](scripts/backend_api.example.js)
