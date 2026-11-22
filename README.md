@@ -4,7 +4,7 @@ Contratos Solidity, suíte de testes Hardhat e scripts de implantação da arqui
 
 | Contrato | Descrição | Testes |
 | :--- | :--- | :--- |
-| [`WydenCoin.sol`](contracts/WydenCoin.sol) | Token ERC-20 (`WC`), 0 casas decimais, emissão com motivo (`bytes32`), emissão atômica em lote e bloqueio de transferências P2P entre alunos | `test/WydenCoin.test.js` |
+| [`WydenCoin.sol`](contracts/WydenCoin.sol) | Token ERC-20 (`WC`), 0 casas decimais, emissão com motivo (`bytes32`), emissão atômica em lote, expiração individual por lote (FEFO) com prazo configurável e bloqueio de transferências P2P entre alunos | `test/WydenCoin.test.js` |
 | [`RedemptionManager.sol`](contracts/RedemptionManager.sol) | Gestão do ciclo de vida de vouchers: custódia no resgate, queima (`burn`) na confirmação de uso, e restituição em cancelamento ou expiração | `test/RedemptionManager.test.js` |
 
 Documentação complementar em `docs/`:
@@ -78,6 +78,7 @@ Os endereços implantados são gravados automaticamente em `addresses.json`.
 | :--- | :--- | :--- | :--- |
 | `DEFAULT_ADMIN_ROLE` | `WydenCoin` e `RedemptionManager` | Administração de roles e vínculo do `RedemptionManager` (`setRedemptionManager`) | Conta de Governança / Deployer |
 | `MINTER_ROLE` | `WydenCoin` | Emissão individual (`mintReward`) e em lote (`mintRewardBatch`) | Backend / Motor de Recompensas |
+| `DIRECTOR_ROLE` | `WydenCoin` | Alteração do prazo de expiração das moedas (`setPeriodoExpiracao`) para novas emissões | Diretoria / Governança |
 | `CONFIRMER_ROLE` | `RedemptionManager` | Validação operacional do voucher e queima definitiva das moedas (`confirmarUso`) | API dos Estabelecimentos |
 | `MANAGER_ROLE` | `RedemptionManager` | Cancelamento administrativo (`cancelar`) e estorno por vencimento (`expirar`) | API de Gestão / Rotina Cron |
 
@@ -97,6 +98,17 @@ O parâmetro `motivo` é codificado em `bytes32` legível via `ethers.encodeByte
 | `CR_SEM` | Desempenho acadêmico (CR) | CR semestral $\ge 6.0$ | 25 a 40 WC |
 | `ESTUDO_30` | *(Reservado)* 30% tempo de estudo | Validação de horas pela coordenação | 100 WC |
 | `ESTUDO_SUBIU` | *(Reservado)* Evolução do tempo de estudo | Crescimento no período avaliado | Bônus |
+
+---
+
+## Expiração por Lote e Governança do Prazo
+
+Cada recebimento de WydenCoin registra um lote próprio na carteira do aluno contendo quantidade, data de recebimento e data de expiração (`expiraEm = block.timestamp + periodoExpiracao`), com prazo padrão inicial de **365 dias**.
+
+* **Expiração isolada por lote:** quando um lote atinge `expiraEm`, somente o saldo remanescente daquele lote expira; moedas recebidas posteriormente permanecem válidas até suas respectivas datas.
+* **Consumo FEFO (*First-Expired, First-Out*):** ao resgatar benefícios, os tokens mais próximos do vencimento são consumidos primeiro.
+* **Alteração de prazo (`DIRECTOR_ROLE`):** contas autorizadas com `DIRECTOR_ROLE` podem alterar o prazo via `setPeriodoExpiracao(uint64 novoPeriodo)` (ou definir `0` para desativar). A alteração vale exclusivamente para **novas emissões**, preservando a data de validade dos lotes já creditados.
+* **Queima on-chain (`_burn`):** `balanceOf(aluno)` desconta imediatamente lotes vencidos; a queima efetiva (redução de `totalSupply` e evento `TokensExpirados`) ocorre automaticamente em movimentações da carteira ou sob demanda via `expirarSaldo(aluno)` e `expirarSaldoBatch(alunos[])`.
 
 ---
 

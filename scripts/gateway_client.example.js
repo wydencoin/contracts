@@ -98,6 +98,55 @@ class WydencoinGatewayClient {
   }
 
   /**
+   * Consulta o saldo valido, o saldo expiravel e os lotes ativos com datas de vencimento.
+   *
+   * @param {string} alunoAddress - Endereco hexadecimal da carteira (0x...)
+   * @returns {Promise<{ success: boolean, aluno: string, saldoValido: number, saldoExpiravel: number, lotes: Array }>}
+   */
+  async getLotesSaldo(alunoAddress) {
+    if (!alunoAddress) {
+      throw new Error("Endereco do aluno e obrigatorio.");
+    }
+    return this._request(`/api/v1/saldo/${alunoAddress}/lotes`);
+  }
+
+  /**
+   * Consulta a politica atual de expiracao de moedas configurada no contrato.
+   *
+   * @returns {Promise<{ success: boolean, periodoSegundos: number, periodoDias: number, ativo: boolean }>}
+   */
+  async getPoliticaExpiracao() {
+    return this._request("/api/v1/config/expiracao");
+  }
+
+  /**
+   * Altera o prazo de expiracao aplicado as novas emissoes (requer DIRECTOR_ROLE).
+   *
+   * @param {{ dias?: number, segundos?: number, directorPrivateKey?: string }} opcoes
+   * @returns {Promise<{ success: boolean, periodoSegundos: number, periodoDias: number, ativo: boolean, txHash: string, blockNumber: number }>}
+   */
+  async alterarPeriodoExpiracao({ dias, segundos, directorPrivateKey } = {}) {
+    return this._request("/api/v1/config/expiracao", {
+      method: "PUT",
+      body: { dias, segundos, directorPrivateKey }
+    });
+  }
+
+  /**
+   * Executa a queima on-chain de lotes expirados para uma ou mais carteiras (rotina cron).
+   *
+   * @param {string|string[]} alunos - Endereco ou lista de enderecos de carteiras
+   * @returns {Promise<{ success: boolean, totalContasVerificadas: number, totalQueimado: number, detalhes: Array, txHash: string }>}
+   */
+  async executarExpiracao(alunos) {
+    const lista = Array.isArray(alunos) ? alunos : [alunos];
+    return this._request("/api/v1/expiracao/executar", {
+      method: "POST",
+      body: { alunos: lista }
+    });
+  }
+
+  /**
    * Emite moedas (mint) para um aluno individual com base em um motivo pedagogico.
    * Requer autenticacao. Assinado internamente com a role MINTER_ROLE.
    *
