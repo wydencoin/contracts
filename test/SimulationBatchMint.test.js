@@ -46,8 +46,8 @@ describe("Simulação Quinzenal de Emissão em Lote (mintRewardBatch)", function
     const tx = await wc.connect(minter).mintRewardBatch(alunosArr, valoresArr, motivosArr);
     const receipt = await tx.wait();
 
-    // Valida consumo de gas razoável (< 3.000.000)
-    expect(receipt.gasUsed).to.be.lessThan(3000000n);
+    // Valida consumo de gas razoavel para 213 emissoes com registro de lotes por carteira (< 8.000.000)
+    expect(receipt.gasUsed).to.be.lessThan(8000000n);
 
     // Valida saldo de todos os 66 alunos
     for (const [studentAddr, expectedBalance] of expectedBalances.entries()) {
